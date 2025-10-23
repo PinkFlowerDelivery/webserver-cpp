@@ -12,6 +12,7 @@ _deps
 CMakeUserPresets.json
 
 .cache/
+.idea/
 build/
 
 # CLion

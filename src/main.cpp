@@ -1,4 +1,4 @@
-#include "server/server.h"
+#include "network/socket.h"
 #include <arpa/inet.h>
 #include <iostream>
 #include <netinet/in.h>
@@ -9,8 +9,8 @@ int main()
 {
     std::cout << "Hello, world!" << "\n";
 
-    Server server{"192.168.0.105", 8080};
-    server.init();
+    Socket socket{"192.168.0.105", 8080};
+    socket.init();
 
     return 0;
 }

@@ -3,13 +3,13 @@
 #include <cstdint>
 #include <string>
 
-class Server
+class Socket
 {
     std::string ip;
     uint16_t    port;
 
   public:
-    Server(std::string ip, uint16_t port);
+    Socket(std::string ip, uint16_t port);
 
     void init();
 };
