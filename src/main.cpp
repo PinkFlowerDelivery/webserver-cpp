@@ -1,16 +1,32 @@
-#include "network/socket.h"
-#include <arpa/inet.h>
-#include <iostream>
-#include <netinet/in.h>
-#include <stdexcept>
+#include "network/Socket.h"
+#include "protocol/ParseHttp.h"
+#include <fmt/base.h>
 #include <sys/socket.h>
+#include <unistd.h>
+#include <vector>
 
 int main()
 {
-    std::cout << "Hello, world!" << "\n";
+    Socket   socket{"192.168.0.105", 8080};
+    uint32_t socketPort = socket.init();
+    fmt::println("Server started at {}", socketPort);
 
-    Socket socket{"192.168.0.105", 8080};
-    socket.init();
+    while (true)
+    {
+
+        int32_t ClientConnection = accept(socket.getSocketDescriptor(), nullptr, nullptr);
+        if (ClientConnection == -1)
+        {
+            fmt::println("Error: {}", strerror(errno));
+        }
+
+        // WARN: Magic numbers
+        std::vector<char> buffer;
+        buffer.reserve(128);
+
+        recv(ClientConnection, buffer.data(), 1024, 0);
+        close(ClientConnection);
+    }
 
     return 0;
 }
