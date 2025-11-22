@@ -1,5 +1,6 @@
 #include "network/Socket.h"
-#include "protocol/ParseHttp.h"
+#include "protocol/HttpParser.h"
+#include <cstdint>
 #include <fmt/base.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -7,26 +8,22 @@
 
 int main()
 {
-    Socket   socket{"192.168.0.105", 8080};
-    uint32_t socketPort = socket.init();
-    fmt::println("Server started at {}", socketPort);
+    Socket socket{"192.168.0.105", 8080};
+    fmt::println("Server started at {}", socket.getPort());
 
     while (true)
     {
 
-        int32_t ClientConnection = accept(socket.getSocketDescriptor(), nullptr, nullptr);
-        if (ClientConnection == -1)
-        {
-            fmt::println("Error: {}", strerror(errno));
-        }
+        int32_t clientConn = socket.acceptClient();
 
-        // WARN: Magic numbers
-        std::vector<char> buffer;
-        buffer.reserve(128);
+        std::vector<char> buffer(1024);
+        int32_t receivedBytes = socket.receive(clientConn, buffer);
 
-        recv(ClientConnection, buffer.data(), 1024, 0);
-        close(ClientConnection);
+        std::string data(buffer.data(), receivedBytes);
+
+        ParseHttp ph;
+        ph.parse(data);
+
+        close(clientConn);
     }
-
-    return 0;
 }

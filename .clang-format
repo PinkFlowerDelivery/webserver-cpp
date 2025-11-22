@@ -6,8 +6,6 @@ ColumnLimit: 100
 BreakBeforeBraces: Allman
 PointerAlignment: Left
 AllowShortFunctionsOnASingleLine: Empty
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
 SpaceAfterTemplateKeyword: true
 SortIncludes: true
 ReflowComments: true

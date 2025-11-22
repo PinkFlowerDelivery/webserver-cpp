@@ -8,16 +8,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
-Socket::Socket(std::string ip, uint32_t port)
+Socket::Socket(const std::string& ip, uint32_t port) : ip(ip), port(port)
 {
-    this->ip   = ip;
-    this->port = port;
-}
-
-uint32_t Socket::init()
-{
-    uint32_t sock = socket(AF_INET, SOCK_STREAM, 0);
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1)
     {
         fmt::println("Error: {}", strerror(errno));
@@ -25,28 +20,47 @@ uint32_t Socket::init()
     this->socketDescriptor = sock;
 
     sockaddr_in SockInfo;
-    SockInfo.sin_family      = AF_INET;
+    SockInfo.sin_family = AF_INET;
     SockInfo.sin_addr.s_addr = inet_addr(ip.c_str());
-    SockInfo.sin_port        = htons(port);
+    SockInfo.sin_port = htons(port);
 
-    // auto c = static_cast<sockaddr*>(&SockInfo);
-
-    int32_t BindAddr = bind(sock, (sockaddr*)&SockInfo, sizeof(SockInfo));
+    ssize_t BindAddr = bind(sock, reinterpret_cast<sockaddr*>(&SockInfo), sizeof(SockInfo));
     if (BindAddr == -1)
     {
         fmt::println("Error: {}", strerror(errno));
     }
 
-    int32_t listener = listen(sock, 10);
+    ssize_t listener = listen(sock, 10);
     if (listener == -1)
     {
         fmt::println("Error: {}", strerror(errno));
     }
-
-    return this->port;
 };
 
-const uint32_t Socket::getSocketDescriptor() const
+ssize_t Socket::acceptClient()
 {
-    return this->socketDescriptor;
+
+    ssize_t ClientConnection = accept(this->socketDescriptor, nullptr, nullptr);
+    if (ClientConnection == -1)
+    {
+        fmt::println("Error: {}", strerror(errno));
+    }
+
+    return ClientConnection;
+}
+
+ssize_t Socket::receive(int32_t clientConn, std::vector<char>& buffer)
+{
+    ssize_t receivedBytes = recv(clientConn, buffer.data(), buffer.size(), 0);
+    if (receivedBytes == -1)
+    {
+        fmt::println("Error: {}", strerror(errno));
+    }
+
+    return receivedBytes;
 };
+
+uint32_t Socket::getPort() const
+{
+    return port;
+}
